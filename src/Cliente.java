@@ -11,26 +11,29 @@ public class Cliente extends Criptografia implements Runnable {
 	
 	private Socket cliente;
 	private String host;
-	private String path;
-	private Mensagens msg;
 	private List<User> contatos;
-	
+	private Tela tela;
+	private PrintStream output;
+	private String nickname;
 	
 	public Socket getCliente() {
 		return cliente;
 	}
 	
+	public String getNickname() {
+		return nickname;
+	}
+	
 	public Cliente (String host, String nickname)  {
 		super();
 		this.host = host;	
-		path = nickname + ".txt";
-		msg = new Mensagens();
+		this.nickname = nickname;
 		contatos = new ArrayList<User>();
+		tela = new Tela(this, nickname);
 		
 		try {
-			
 			cliente = new Socket(this.host, Servidor.PORTA);
-			PrintStream output = new PrintStream(cliente.getOutputStream());
+			output = new PrintStream(cliente.getOutputStream());
 			output.println(nickname);
 			Thread tc = new Thread(this);
 			tc.start();
@@ -42,27 +45,9 @@ public class Cliente extends Criptografia implements Runnable {
 		}
 		
 	}
-
-	public void executa() {
-		
-		try {
-			Scanner teclado = new Scanner(System.in);
-			PrintStream output = new PrintStream(cliente.getOutputStream());
-			
-		    while (teclado.hasNextLine()) {
-		    	String[] message = teclado.nextLine().split(":");
-		    	
-		    	String newMessage = message[0] + ":" + criptografar(message[1]);
-		    			    	
-		    	output.println(newMessage);
-			}
-		    
-			teclado.close();
-		} catch (NullPointerException e) {
-			// Não faz nada caso o servidor não exista
-		} catch (IOException e) {
-			// Não faz nada caso o servidor não exista
-		}
+	
+	public void enviarMensagens (String nickname, String msg) {
+		output.println(nickname + ":" + criptografar(msg));
 	}
 	
 	@Override
@@ -99,7 +84,6 @@ public class Cliente extends Criptografia implements Runnable {
 		System.out.println("Digite o IP do computador que deseja conectar");
 		String ip = s.nextLine();
 		Cliente client = new Cliente(ip, nickname);
-		client.executa();
 		Thread tc = new Thread(client);
 		tc.start();
 		s.close();

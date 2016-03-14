@@ -9,38 +9,41 @@ import java.util.List;
 import java.util.Scanner;
 
 public class Servidor implements Runnable {
-	
+
 	final static int PORTA = 12345;
 	private static List<User> clientes;
 	private static ServerSocket servidor;
 	private static User justConnected;
-	
-	public Servidor (int porta) {
+
+	public Servidor(int porta) {
 		System.out.println("Iniciando servidor ...");
 		clientes = new ArrayList<User>();
 	}
-	
+
 	public void executa() {
 		Scanner s;
-		
+
 		try {
 			servidor = new ServerSocket(PORTA);
 			System.out.printf("Porta %d aberta\n", PORTA);
 			while (true) {
-				
-				/* Espera um cliente se conectar ao servidor, cria um objeto para este cliente
-				 * e lança uma thread para tratar as mensagens enviadas por ele */
-				
+
+				/*
+				 * Espera um cliente se conectar ao servidor, cria um objeto
+				 * para este cliente e lança uma thread para tratar as mensagens
+				 * enviadas por ele
+				 */
+
 				Socket c = servidor.accept();
 				s = new Scanner(c.getInputStream());
 				User user = new User(s.nextLine(), c);
 				justConnected = user;
-				
+
 				System.out.println("Nova conexão com o cliente " + user.getNickname());
-			
+
 				Thread t = new Thread(this);
 				t.start();
-				
+
 				Servidor.clientes.add(user);
 			}
 		} catch (BindException e) {
@@ -50,53 +53,54 @@ public class Servidor implements Runnable {
 		}
 	}
 
-	private void redirecionarMensagens () {
-		
-		try { 
-				User client = justConnected;
-				Scanner s = new Scanner(client.getSocket().getInputStream());
-						
-				while (s.hasNextLine()) {
-								
-					String messageReceived = s.nextLine();
-					String[] message = messageReceived.split(":");
-					
-					for (User u : clientes) {
-										
-						if (u.getNickname().equals(message[0])) {
-							
-							PrintStream output = new PrintStream(u.getSocket().getOutputStream());
-							
-							if (u.getNickname().equals(client.getNickname())) {
-								output.println("Servidor: Você não pode enviar mensagens para si mesmo");
-								break;
-							}
-							
-							String newMessage = client.getNickname() + ":" + message[1];
-							
-							output.println(newMessage);
-							
+	private void redirecionarMensagens() {
+
+		try {
+			User client = justConnected;
+			Scanner s = new Scanner(client.getSocket().getInputStream());
+
+			while (s.hasNextLine()) {
+
+				String messageReceived = s.nextLine();
+				String[] message = messageReceived.split(":");
+
+				for (User u : clientes) {
+
+					if (u.getNickname().equals(message[0])) {
+
+						PrintStream output = new PrintStream(u.getSocket().getOutputStream());
+
+						if (u.getNickname().equals(client.getNickname())) {
+							output.println("Servidor: Você não pode enviar mensagens para si mesmo");
 							break;
 						}
+
+						String newMessage = client.getNickname() + ":" + message[1];
+
+						System.out.println(newMessage);
+
+						output.println(newMessage);
+
+						break;
 					}
 				}
-				
-				System.out.printf("O cliente %s desconectou\n", client.getNickname());
-				clientes.remove(client);
-				s.close();
-				
+			}
+
+			System.out.printf("O cliente %s desconectou\n", client.getNickname());
+			clientes.remove(client);
+			s.close();
+
 		} catch (IOException e) {
 			//
 		}
 	}
-	
-	
+
 	@Override
-	public void run () {
+	public void run() {
 		redirecionarMensagens();
 	}
-	
-	public static void main (String[] args) throws IOException {
+
+	public static void main(String[] args) throws IOException {
 		Servidor server = new Servidor(PORTA);
 		server.executa();
 	}

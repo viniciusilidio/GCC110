@@ -1,40 +1,62 @@
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 public class Mensagens {
 
-	public void carregarMensagens (String path, String nickname) {
+	public String carregarMensagens (String usuario, String nickname) {
+		
+		StringBuilder stb = new StringBuilder();
 		
 		try {
-			InputStream input = new FileInputStream(path);
+			String arquivo = usuario + ";" + nickname + ".txt";
+						
+			InputStream input = new FileInputStream(arquivo);
+			
+			System.out.println(input);
+			
 		    Scanner entrada = new Scanner(input);
-		    String condition = "/---" + nickname + "---/";
 		    String line;
 		    
 		    while (entrada.hasNextLine()) {
-		    			    	
-		    	while (!entrada.nextLine().equals(condition));
-		    	
-		    	while (!(line = entrada.nextLine()).equals("/---END---/")) {
-		    		System.out.println(line);
-		    	}
+		    	line = entrada.nextLine();
+		    	stb.append(line);
+		    	stb.append("\n");
 		    }
 		    
 		    entrada.close();
+		    return stb.toString();
 		    
 		} catch (FileNotFoundException e) {
-			System.out.println("Arquivo contendo as mensagens não foi encontrado");
+			return "Arquivo contendo as mensagens não foi encontrado";
 		} catch (NoSuchElementException e) {
-			System.out.printf("Conversas com o usuário %s não encontrada\n", nickname);
+			return "Conversas com o usuário " + nickname + " não encontrada\n";
 		}
 	}
 	
-	public static void main (String[] args) {
+	public void gravarMensagens (String usuario, String nickname) {
 		
-		Mensagens msg = new Mensagens();
-		msg.carregarMensagens("Vinicius.txt", "Gustavo");
+		try {
+			String arquivo = usuario + ";" + nickname + ".txt";
+			
+			File f = new File(arquivo);
+			
+			if (f.exists()) {
+				
+				
+				
+				
+			} else {
+				f.createNewFile();
+			}
+		} catch (IOException e) {
+			System.out.println("Arquivo ja existe");
+		}
+		
 	}
 }

@@ -5,16 +5,13 @@ public class Criptografia {
 	
 	private int chave = 0;
 	
-	public Criptografia (int op) {
-		if (op != 0) {
+	public Criptografia () {		
+		Scanner s = new Scanner(System.in);
 		
-			Scanner s = new Scanner(System.in);
-			
-			System.out.println("Digite a chave de criptografia (número inteiro):");
-			System.out.println("Case a chave de criptografia esteja incorreta o texto ficara incompreensível");
-			
-			fillCript(s);
-		}
+		System.out.println("Digite a chave de criptografia (número inteiro):");
+		System.out.println("Case a chave de criptografia esteja incorreta o texto ficara incompreensível");
+		
+		fillCript(s);
 	}
 	
 	
@@ -46,7 +43,7 @@ public class Criptografia {
 		return criptedString;
 	}
 	
-	public String descriptografar (String message, int chave) {
+	public String descriptografar (String message) {
 		char charMessage[] = message.toCharArray();
 		char decryptedMessage[] = new char[message.length()];
 		

@@ -1,32 +1,31 @@
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.io.PrintStream;
-import java.net.ConnectException;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class Cliente extends Criptografia implements Runnable {
 	
 	private Socket cliente;
 	private String host;
-	private String nickname;
+	private String path;
+	private Mensagens msg;
+	private List<User> contatos;
+	
 	
 	public Socket getCliente() {
 		return cliente;
 	}
 	
-	public Cliente (String host, String nickname) throws UnknownHostException, IOException, ConnectException {		
-		super(1);
-		
-		this.nickname = nickname;
+	public Cliente (String host, String nickname)  {
+		super();
 		this.host = host;	
+		path = nickname + ".txt";
+		msg = new Mensagens();
+		contatos = new ArrayList<User>();
 		
 		try {
 			
@@ -35,21 +34,35 @@ public class Cliente extends Criptografia implements Runnable {
 			output.println(nickname);
 			Thread tc = new Thread(this);
 			tc.start();
-			
-		} catch (ConnectException e) {
-			System.out.println("Servidor não existe");
-		}
-	}
-	
-	public void executa() throws IOException {
-		Scanner teclado = new Scanner(System.in);
-		PrintStream output = new PrintStream(cliente.getOutputStream());
 		
-	    while (teclado.hasNextLine()) {
-	    	output.println(teclado.nextLine());
+		} catch (UnknownHostException e) {
+			System.out.println("Servidor não existe");
+		} catch (IOException e) {
+			// Não faz nada caso o servidor não exista
 		}
-	    
-		teclado.close();
+		
+	}
+
+	public void executa() {
+		
+		try {
+			Scanner teclado = new Scanner(System.in);
+			PrintStream output = new PrintStream(cliente.getOutputStream());
+			
+		    while (teclado.hasNextLine()) {
+		    	String[] message = teclado.nextLine().split(":");
+		    	
+		    	String newMessage = message[0] + ":" + criptografar(message[1]);
+		    			    	
+		    	output.println(newMessage);
+			}
+		    
+			teclado.close();
+		} catch (NullPointerException e) {
+			// Não faz nada caso o servidor não exista
+		} catch (IOException e) {
+			// Não faz nada caso o servidor não exista
+		}
 	}
 	
 	@Override
@@ -58,14 +71,26 @@ public class Cliente extends Criptografia implements Runnable {
 			Scanner s = new Scanner(cliente.getInputStream());
 			
 			while (s.hasNextLine()) {
-				System.out.println(s.nextLine());
+				
+				String[] message = s.nextLine().split(":");
+								
+				String newMessage = message[0] + ":" + descriptografar(message[1]);
+				
+				System.out.println(newMessage);
 			}
+			
+			s.close();
+			System.out.println("Servidor desconectou");
+			Thread.currentThread().stop();
+			
+		} catch (NullPointerException e) {
+			// Não faz nada caso o servidor não exista
 		} catch (IOException e) {
-			e.printStackTrace();
+			// Não faz nada caso o servidor não exista
 		}
 	}
 	
-	public static void main (String [] args) throws ConnectException, UnknownHostException, IOException {
+	public static void main (String [] args) {
 	
 		System.out.println("Iniciando cliente ...");
 		Scanner s = new Scanner(System.in);
@@ -77,6 +102,6 @@ public class Cliente extends Criptografia implements Runnable {
 		client.executa();
 		Thread tc = new Thread(client);
 		tc.start();
-		
+		s.close();
 	}
 }

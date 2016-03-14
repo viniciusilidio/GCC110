@@ -20,13 +20,14 @@ public class Servidor implements Runnable {
 		clientes = new ArrayList<User>();
 	}
 	
-	public void executa() throws IOException {
+	public void executa() {
 		Scanner s;
 		
 		try {
 			servidor = new ServerSocket(PORTA);
 			System.out.printf("Porta %d aberta\n", PORTA);
 			while (true) {
+				
 				/* Espera um cliente se conectar ao servidor, cria um objeto para este cliente
 				 * e lança uma thread para tratar as mensagens enviadas por ele */
 				
@@ -44,48 +45,55 @@ public class Servidor implements Runnable {
 			}
 		} catch (BindException e) {
 			System.out.printf("Porta %d ocupada\n", PORTA);
+		} catch (IOException e) {
+			// Não faz nada caso a porta esteja sendo usada
 		}
 	}
 
-	private void redirecionarMensagens () throws IOException {
+	private void redirecionarMensagens () {
 		
-		User client = justConnected;
-		Scanner s = new Scanner(client.getSocket().getInputStream());
-				
-		while (s.hasNextLine()) {
+		try { 
+				User client = justConnected;
+				Scanner s = new Scanner(client.getSocket().getInputStream());
 						
-			String messageReceived = s.nextLine();
-			String[] message = messageReceived.split(";");
-			
-			for (User u : clientes) {
+				while (s.hasNextLine()) {
 								
-				if (u.getNickname().equals(message[0])) {
+					String messageReceived = s.nextLine();
+					String[] message = messageReceived.split(":");
 					
-					PrintStream output = new PrintStream(u.getSocket().getOutputStream());
-					
-					if (u.getNickname().equals(client.getNickname())) {
-						output.println("Servidor: Você não pode enviar mensagens para si mesmo");
-						break;
+					for (User u : clientes) {
+										
+						if (u.getNickname().equals(message[0])) {
+							
+							PrintStream output = new PrintStream(u.getSocket().getOutputStream());
+							
+							if (u.getNickname().equals(client.getNickname())) {
+								output.println("Servidor: Você não pode enviar mensagens para si mesmo");
+								break;
+							}
+							
+							String newMessage = client.getNickname() + ":" + message[1];
+							
+							output.println(newMessage);
+							
+							break;
+						}
 					}
-					
-					String newMessage = client.getNickname() + ": " + message[1];
-					
-					output.println(newMessage);
-					
-					break;
 				}
-			}
+				
+				System.out.printf("O cliente %s desconectou\n", client.getNickname());
+				clientes.remove(client);
+				s.close();
+				
+		} catch (IOException e) {
+			//
 		}
 	}
 	
 	
 	@Override
 	public void run () {
-		try {
-			redirecionarMensagens();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		redirecionarMensagens();
 	}
 	
 	public static void main (String[] args) throws IOException {

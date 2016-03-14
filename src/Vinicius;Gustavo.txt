@@ -1,4 +1,2 @@
-Vinicius: E ai
-Gustavo: Fala
-Vinicius: Ta tranquilo ?
-Gustavo: Ta favoravel !
+E ai
+E ai

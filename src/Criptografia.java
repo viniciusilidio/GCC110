@@ -1,66 +1,68 @@
-import java.util.InputMismatchException;
-import java.util.Scanner;
+/**
+ * Classe responsável por criptografar e descriptografar as mensagens enviadas
+ * pelos usuarios
+ */
 
 public class Criptografia {
-	
+
 	private int chave = 0;
-	
-	public Criptografia () {		
-		Scanner s = new Scanner(System.in);
-		
-		System.out.println("Digite a chave de criptografia (número inteiro):");
-		System.out.println("Case a chave de criptografia esteja incorreta o texto ficara incompreensível");
-		
-		fillCript(s);
-	}
-	
-	
-	private void fillCript (Scanner s) {
-		int criptChave;
-		
-		try {
-			criptChave = s.nextInt();
-			chave = criptChave;
-		} catch (InputMismatchException e) {
-			s.nextLine();
-			System.out.println("Digite um número inteiro:");
-			fillCript(s);
-		}
-	}
-	
-	public String criptografar (String message) {
-	
+
+	/**
+	 * Criptografa a string passado como parametro usando a chave continda na
+	 * instancia da classe, caso a chave seja 0 o retorno da criptografia sera a
+	 * mensagem original sem modificações
+	 * 
+	 * @param message
+	 * @return criptedString
+	 */
+	public String criptografar(String message) {
+
 		char charMessage[] = message.toCharArray();
 		char criptMessage[] = new char[message.length()];
-		
-		for (int i = 0; i<message.length(); i++) {
-			char criptedChar = (char) (((int)charMessage[i]) + chave * (i + 1));
+
+		for (int i = 0; i < message.length(); i++) {
+			char criptedChar = (char) (((int) charMessage[i]) + chave * (i + 1));
 			criptMessage[i] = criptedChar;
 		}
-		
+
 		String criptedString = String.valueOf(criptMessage);
-		
+
 		return criptedString;
 	}
-	
-	public String descriptografar (String message) {
+
+	/**
+	 * Descriptografa a string passado como parametro usando a chave continda na
+	 * instancia da classe
+	 * 
+	 * @param message
+	 * @return decryptedString
+	 */
+	public String descriptografar(String message) {
 		char charMessage[] = message.toCharArray();
 		char decryptedMessage[] = new char[message.length()];
-		
-		for (int i = 0; i<message.length(); i++) {
-			char criptedChar = (char) (((int)charMessage[i]) - chave * (i + 1));
+
+		for (int i = 0; i < message.length(); i++) {
+			char criptedChar = (char) (((int) charMessage[i]) - chave * (i + 1));
 			decryptedMessage[i] = criptedChar;
 		}
-		
+
 		String decryptedString = String.valueOf(decryptedMessage);
-		
+
 		return decryptedString;
 	}
-	
-	public int getChave () {
+
+	/**
+	 * retorn a chave de criptografia
+	 * @return chave
+	 */
+	public int getChave() {
 		return chave;
 	}
-	
+
+	/**
+	 * Define a chave de criptografia
+	 * @param chave
+	 */
 	public void setChave(int chave) {
 		this.chave = chave;
 	}

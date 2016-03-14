@@ -1,4 +1,7 @@
 
+/**
+ * Classe usada para representar o servidor
+ */
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.BindException;
@@ -10,16 +13,27 @@ import java.util.Scanner;
 
 public class Servidor implements Runnable {
 
-	final static int PORTA = 12345;
+	public static int PORTA = 12345;
 	private static List<User> clientes;
 	private static ServerSocket servidor;
 	private static User justConnected;
 
-	public Servidor(int porta) {
+	/**
+	 * Constro o servidor usando a constante PORTA como a porta de conexão do
+	 * socket
+	 * 
+	 * @param porta
+	 */
+	public Servidor() {
 		System.out.println("Iniciando servidor ...");
 		clientes = new ArrayList<User>();
 	}
 
+	/**
+	 * Executa o servidor e aceita atraves de um loop infinito a conexão de
+	 * vários usuarios, disparando uma thread para tratar as mensagens por eles
+	 * enviadas individualmente
+	 */
 	public void executa() {
 		Scanner s;
 
@@ -53,6 +67,10 @@ public class Servidor implements Runnable {
 		}
 	}
 
+	/**
+	 * Redireciona as mensagens enviadas pelos usuarios as destinatarios
+	 * corretos
+	 */
 	private void redirecionarMensagens() {
 
 		try {
@@ -95,13 +113,22 @@ public class Servidor implements Runnable {
 		}
 	}
 
+	/**
+	 * Dispara uma threada para redirecionar as mensagens de cada usuario que se
+	 * conecta
+	 */
 	@Override
 	public void run() {
 		redirecionarMensagens();
 	}
 
-	public static void main(String[] args) throws IOException {
-		Servidor server = new Servidor(PORTA);
+	/**
+	 * Cria e executa um servidor
+	 * @param args
+	 * @throws IOException
+	 */
+	public static void main(String[] args) {
+		Servidor server = new Servidor();
 		server.executa();
 	}
 }

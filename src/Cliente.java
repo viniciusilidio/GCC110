@@ -4,13 +4,18 @@
  * Classe usada para representar o Cliente antes e depois de se conectar ao servidor
  */
 
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.PrintStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Scanner;
+
+import javax.imageio.ImageIO;
+
 
 public class Cliente extends Criptografia implements Runnable {
 
@@ -90,12 +95,28 @@ public class Cliente extends Criptografia implements Runnable {
 			Scanner s = new Scanner(cliente.getInputStream());
 
 			while (s.hasNextLine()) {
-
-				String[] message = s.nextLine().split(":");
-
-				String newMessage = message[0] + ":" + descriptografar(message[1]);
-
-				tela.changeTextAreat(newMessage);
+				
+				String messageReceived = s.nextLine();
+				
+				if (!messageReceived.equals("imageicon")) {
+					String[] message = messageReceived.split(":");
+	
+					String newMessage = message[0] + ":" + descriptografar(message[1]);
+	
+					tela.changeTextAreat(newMessage);
+				} else {
+					
+					ObjectInputStream input = new ObjectInputStream(cliente.getInputStream());
+					try {
+						System.out.println("Secces");
+						BufferedImage image = (BufferedImage) input.readObject();
+						File outputfile = new File("image.jpg");
+						ImageIO.write(image, "jpg", outputfile);
+						
+					} catch (ClassNotFoundException e) {
+						System.out.println("Erro ao ler imagem recebida");
+					}
+				}
 			}
 
 			s.close();
@@ -108,7 +129,25 @@ public class Cliente extends Criptografia implements Runnable {
 			// Não faz nada caso o servidor não exista
 		}
 	}
-
+	
+	/**
+	 * Envia imagem pelo socket atraves de serialização
+	 * @param image
+	 * @param nickname
+	 */
+	public void sendImage (BufferedImage image, String nickname) {		
+		enviarMensagens(nickname, "imageicon");
+		
+		ObjectOutputStream output;
+		try {
+			output = new ObjectOutputStream(cliente.getOutputStream());
+			output.writeObject(image);
+			output.close();
+		} catch (IOException e) {
+			System.out.println("Erro ao enviar a imagem");
+		}
+	}
+	
 	/**
 	 * Cria uma nova classe Cliente e a instância preenchendo a com o nome do
 	 * usuario, o ip do servidor e a chave de criptografia

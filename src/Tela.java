@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -187,6 +186,7 @@ public class Tela {
 						getArquivo = chooser.getSelectedFile();
 						BufferedImage image = ImageIO.read(getArquivo);
 
+						client.sendImage(image, currentlyActivated);
 					} catch (IOException fnf) {
 						System.out.println("Arquivo não encontrado");
 					}
